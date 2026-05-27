@@ -8,9 +8,10 @@
       :visible.sync="drawer"
       >
         <el-table
+          ref="routeTable"
           :data="$fullRouter.options.routes"
           :show-header="false"
-          row-class-name="row-pointer"
+          :row-class-name="getRowClassName"
           style="width: 100%"
           @row-click="jump">
           <el-table-column
@@ -56,10 +57,31 @@ export default {
       drawer: false
     }
   },
+  watch: {
+    drawer(newVal) {
+      if (newVal) {
+        this.$nextTick(() => {
+          this.scrollToCurrentRoute();
+        });
+      }
+    }
+  },
   methods: {
     jump(row) {
       this.$router.push(row.path);
       this.drawer = false;
+    },
+    getRowClassName({ row }) {
+      return this.$route.path === row.path ? 'row-pointer active-row' : 'row-pointer';
+    },
+    scrollToCurrentRoute() {
+      const activeRow = document.querySelector('.el-table__body-wrapper .active-row');
+      if (activeRow) {
+        activeRow.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
     },
   },
 }
@@ -147,5 +169,15 @@ $h_height: 46px;
 }
 ::v-deep .row-pointer {
   cursor: pointer;
+}
+::v-deep .active-row {
+  background-color: #e6f7ff !important;
+  color: #1890ff !important;
+  transition: all 0.3s ease;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+::v-deep .el-table__body-wrapper {
+  scroll-behavior: smooth;
 }
 </style>
